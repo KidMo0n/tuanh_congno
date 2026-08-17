@@ -119,12 +119,6 @@ tbody tr.dong-cong-bang td{padding:9px 6px;font-size:11.5px;font-weight:700;
 @keyframes quay{to{transform:rotate(360deg)}}
 @media (prefers-reduced-motion:reduce){.vong-quay{animation-duration:2s}*{transition:none!important}}
 
-.canh-bao{
-  display:none;margin:14px 0 0;padding:10px 13px;background:#FFF6E5;border-left:3px solid #C98A16;
-  font-size:11.5px;line-height:1.55;color:#6B4A05;
-}
-.canh-bao.hien{display:block}
-
 /* ── IN RA PDF ── */
 @media print{
   body{background:#fff;padding:0}
@@ -257,8 +251,6 @@ tbody tr.dong-cong-bang td{padding:9px 6px;font-size:11.5px;font-weight:700;
 
   <div class="loi-cam-on" id="loiCamOn">Cảm ơn quý khách đã tin tưởng vườn lan Tú Anh</div>
 
-  <div class="canh-bao khong-chup" id="canhBao"></div>
-
   <div class="khu-nut khong-chup">
     <button class="nut nut-chinh" onclick="window.print()">Xuất PDF / In</button>
     <button class="nut nut-phu" onclick="chiaSeAnh()" id="nutAnh">
@@ -316,11 +308,6 @@ function docThamSo(){
     rowExtra:    p.get('rowExtra'),
     rowShipping: p.get('rowShipping'),
 
-    // ghi đè tổng nếu muốn lấy đúng số của AppSheet
-    tongTienCay:   p.get('tongTienCay'),
-    tongVanChuyen: p.get('tongVanChuyen'),
-    tongDenBu:     p.get('tongDenBu'),
-    tongCong:      p.get('tongCong'),
 
     companyName: p.get('companyName'),
     companyAddress: p.get('companyAddress'),
@@ -556,12 +543,9 @@ function veBang(p){
   document.getElementById('tongCay').textContent=vietSo(sSL);
   document.getElementById('demDong').textContent = dem ? vietSo(dem)+' dòng · '+vietSo(sSL)+' cây' : '';
 
-  // Tổng: tự tính, nhưng tham số truyền vào được ưu tiên
-  const tCay = p.tongTienCay!=null   ? docSo(p.tongTienCay)   : sCay;
-  const tPhi = p.tongVanChuyen!=null ? docSo(p.tongVanChuyen) : sPhi;
-  const tBu  = p.tongDenBu!=null     ? docSo(p.tongDenBu)     : sBu;
-  const tuTinh = CAU_HINH.denBu==='tru' ? tCay+tPhi-tBu : tCay+tPhi+tBu;
-  const tCong = p.tongCong!=null ? docSo(p.tongCong) : tuTinh;
+  // Mọi con số đều cộng từ các dòng chi tiết, không nhận tổng từ bên ngoài
+  const tCay = sCay, tPhi = sPhi, tBu = sBu;
+  const tCong = CAU_HINH.denBu==='tru' ? tCay+tPhi-tBu : tCay+tPhi+tBu;
 
   document.getElementById('tongTienCay').textContent=vietSo(tCay)+' đ';
   document.getElementById('tongVanChuyen').textContent=vietSo(tPhi)+' đ';
@@ -578,13 +562,6 @@ function veBang(p){
   document.getElementById('dongVanChuyen').style.display = coPhi ? '' : 'none';
   document.querySelectorAll('.cot-phi-vc').forEach(e => { e.style.display = coPhi ? '' : 'none'; });
 
-  // Cảnh báo nếu số của AppSheet lệch với số tự cộng
-  if(p.tongCong!=null && Math.abs(tCong-tuTinh)>1){
-    const c=document.getElementById('canhBao');
-    c.classList.add('hien');
-    c.textContent='Số tổng nhận được ('+vietSo(tCong)+' đ) lệch '+vietSo(tCong-tuTinh)+
-      ' đ so với tổng cộng từ các dòng chi tiết ('+vietSo(tuTinh)+' đ). Kiểm tra lại dữ liệu trước khi gửi khách.';
-  }
 }
 
 /* ---------- Chạy ---------- */

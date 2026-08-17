@@ -205,6 +205,10 @@ tbody tr.dong-cong-bang td{padding:9px 6px;font-size:11.5px;font-weight:700;
         <span class="nhan-tong">Tổng tiền vận chuyển</span>
         <span class="so-tong" id="tongVanChuyen">0 đ</span>
       </div>
+      <div class="dong-tong dong-den-bu" id="dongKhuyenMai">
+        <span class="nhan-tong">Khuyến mãi</span>
+        <span class="so-tong" id="tongKhuyenMai">0 đ</span>
+      </div>
       <div class="dong-tong dong-den-bu" id="dongDenBu">
         <span class="nhan-tong" id="nhanDenBu">Số tiền phát sinh</span>
         <span class="so-tong" id="tongDenBu">0 đ</span>
@@ -238,6 +242,7 @@ tbody tr.dong-cong-bang td{padding:9px 6px;font-size:11.5px;font-weight:700;
           <th class="giua" style="width:38px">SL</th>
           <th class="phai" style="width:66px">Đơn giá</th>
           <th class="phai" style="width:78px">Thành tiền</th>
+          <th class="phai cot-km" style="width:64px">Khuyến mãi</th>
           <th class="phai cot-den-bu" style="width:60px">Đền bù</th>
           <th class="phai cot-phi-vc" style="width:66px">Phí VC</th>
         </tr>
@@ -285,7 +290,7 @@ const CAU_HINH = {
   denBu: 'tru',
 
   // Ngày kiểu 06/04/2025 không rõ đâu là ngày: 'MDY' hoặc 'DMY'
-  thuTuNgay: 'MDY'
+  thuTuNgay: 'DMY'
 };
 /* ═══════════════════════════════════════════════════════════ */
 
@@ -305,6 +310,7 @@ function docThamSo(){
     rowQty:      p.get('rowQty'),
     rowPrice:    p.get('rowPrice'),
     rowAmount:   p.get('rowAmount'),
+    rowDiscount: p.get('rowDiscount'),
     rowExtra:    p.get('rowExtra'),
     rowShipping: p.get('rowShipping'),
 
@@ -481,29 +487,47 @@ function veBang(p){
     sl:    tachCot(p.rowQty),
     gia:   tachCot(p.rowPrice),
     tien:  tachCot(p.rowAmount),
+    km:    tachCot(p.rowDiscount),
     bu:    tachCot(p.rowExtra),
     phi:   tachCot(p.rowShipping)
   };
-  const soDong=Math.max(...Object.values(cot).map(a=>a.length), 0);
+  // Số dòng = độ dài xuất hiện NHIỀU NHẤT giữa các cột.
+  // Nếu một cột dài bất thường (dữ liệu có chứa "||") thì nó bị bỏ qua
+  // thay vì kéo cả bảng phình ra thành hàng chục dòng rỗng.
+  const doDai = Object.values(cot).map(a=>a.length).filter(n=>n>0);
+  let soDong = 0;
+  if (doDai.length) {
+    const dem = {};
+    doDai.forEach(n => dem[n] = (dem[n]||0) + 1);
+    soDong = +Object.keys(dem).reduce((a,b) => dem[b] > dem[a] ? b : (dem[b]===dem[a] && +b<+a ? b : a));
+    Object.entries(cot).forEach(([ten,a]) => {
+      if (a.length > soDong) {
+        console.warn('[Công nợ] Cột "'+ten+'" có '+a.length+' giá trị nhưng bảng chỉ có '+soDong+
+          ' dòng. Dữ liệu cột này nhiều khả năng chứa ký tự "||". Đã cắt bớt phần thừa.');
+        a.length = soDong;
+      }
+    });
+  }
 
   const than=document.getElementById('thanBang');
   than.innerHTML='';
 
-  let sCay=0, sTien=0, sBu=0, sPhi=0, sSL=0, dem=0;
+  let sCay=0, sTien=0, sKM=0, sBu=0, sPhi=0, sSL=0, dem=0;
   const lay=(a,i)=>(a[i]!==undefined?a[i]:'');
 
   for(let i=0;i<soDong;i++){
     const o={
       ngay:lay(cot.ngay,i), nhan:lay(cot.nhan,i), ma:lay(cot.ma,i), loai:lay(cot.loai,i),
-      sl:lay(cot.sl,i), gia:lay(cot.gia,i), tien:lay(cot.tien,i), bu:lay(cot.bu,i), phi:lay(cot.phi,i)
+      sl:lay(cot.sl,i), gia:lay(cot.gia,i), tien:lay(cot.tien,i),
+      km:lay(cot.km,i), bu:lay(cot.bu,i), phi:lay(cot.phi,i)
     };
     if(Object.values(o).every(v=>v==='')) continue;   // bỏ dòng rỗng hoàn toàn
 
-    const sl=docSo(o.sl), gia=docSo(o.gia), bu=docSo(o.bu), phi=docSo(o.phi);
+    const sl=docSo(o.sl), gia=docSo(o.gia), km=docSo(o.km), bu=docSo(o.bu), phi=docSo(o.phi);
     // Thành tiền: ưu tiên số gửi sang, thiếu thì tự nhân
     const tien = o.tien!=='' ? docSo(o.tien) : sl*gia;
 
-    sSL+=sl; sTien+=tien; sBu+=bu; sPhi+=phi; dem++;
+    sSL+=sl; sTien+=tien; sKM+=km; sBu+=bu; sPhi+=phi; dem++;
 
     const maSach = o.ma.includes('-') ? o.ma.split('-')[0].trim() : o.ma;
     // [NGƯỜI NHẬN] có thể là "Tên │ SĐT │ Địa chỉ" -> chỉ lấy tên
@@ -518,6 +542,7 @@ function veBang(p){
       '<td class="giua so">'+(sl?vietSo(sl):'')+'</td>'+
       '<td class="phai so">'+(gia?vietSo(gia):'')+'</td>'+
       '<td class="phai so">'+vietSo(tien)+'</td>'+
+      '<td class="phai so den-bu cot-km">'+(km?vietSo(km):'')+'</td>'+
       '<td class="phai so den-bu cot-den-bu">'+(bu?vietSo(bu):'')+'</td>'+
       '<td class="phai so cot-phi-vc">'+(phi?vietSo(phi):'')+'</td>';
   }
@@ -535,6 +560,7 @@ function veBang(p){
       '<td class="giua so">'+vietSo(sSL)+'</td>'+
       '<td></td>'+
       '<td class="phai so">'+vietSo(sTien)+'</td>'+
+      '<td class="phai so den-bu cot-km">'+vietSo(sKM)+'</td>'+
       '<td class="phai so den-bu cot-den-bu">'+vietSo(sBu)+'</td>'+
       '<td class="phai so cot-phi-vc">'+vietSo(sPhi)+'</td>';
   }
@@ -544,11 +570,12 @@ function veBang(p){
   document.getElementById('demDong').textContent = dem ? vietSo(dem)+' dòng · '+vietSo(sSL)+' cây' : '';
 
   // Mọi con số đều cộng từ các dòng chi tiết, không nhận tổng từ bên ngoài
-  const tCay = sCay, tPhi = sPhi, tBu = sBu;
-  const tCong = CAU_HINH.denBu==='tru' ? tCay+tPhi-tBu : tCay+tPhi+tBu;
+  const tCay = sCay, tPhi = sPhi, tKM = sKM, tBu = sBu;
+  const tCong = tCay + tPhi - tKM + (CAU_HINH.denBu==='tru' ? -tBu : tBu);
 
   document.getElementById('tongTienCay').textContent=vietSo(tCay)+' đ';
   document.getElementById('tongVanChuyen').textContent=vietSo(tPhi)+' đ';
+  document.getElementById('tongKhuyenMai').textContent = (tKM>0?'− ':'')+vietSo(tKM)+' đ';
   document.getElementById('tongDenBu').textContent=
     (CAU_HINH.denBu==='tru' && tBu>0 ? '− ' : '')+vietSo(tBu)+' đ';
   document.getElementById('tongCong').textContent=vietSo(tCong)+' đ';
@@ -557,6 +584,10 @@ function veBang(p){
   const coDenBu = (tBu!==0 || sBu!==0);
   document.getElementById('dongDenBu').style.display = coDenBu ? '' : 'none';
   document.querySelectorAll('.cot-den-bu').forEach(e => { e.style.display = coDenBu ? '' : 'none'; });
+
+  const coKM = (tKM!==0);
+  document.getElementById('dongKhuyenMai').style.display = coKM ? '' : 'none';
+  document.querySelectorAll('.cot-km').forEach(e => { e.style.display = coKM ? '' : 'none'; });
 
   const coPhi = (tPhi!==0 || sPhi!==0);
   document.getElementById('dongVanChuyen').style.display = coPhi ? '' : 'none';

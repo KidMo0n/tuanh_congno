@@ -1,0 +1,654 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=740, initial-scale=1.0, user-scalable=yes" id="viewport">
+<title>Bảng công nợ</title>
+<style>
+:root{
+  --muc:#241C22; --man:#5A2A47; --man-dam:#38182C;
+  --phan:#F8F1F5; --ke:#E4D7DE; --mo:#8A7A83; --nen:#EFEAEC;
+  --do:#9B2C2C;
+  --serif:Cambria,"Palatino Linotype","Times New Roman",serif;
+  --sans:"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:var(--sans);background:var(--nen);color:var(--muc);padding:24px 12px;-webkit-font-smoothing:antialiased}
+body.dang-chup{background:#fff;padding:0}
+body.dang-chup .khong-chup{display:none!important}
+
+.to-phieu{width:700px;margin:0 auto;background:#fff;padding:34px 34px 26px;box-shadow:0 10px 40px rgba(56,24,44,.14)}
+body.dang-chup .to-phieu{box-shadow:none;padding:26px 28px 20px}
+
+/* ── ĐẦU ── */
+.dau-phieu{display:flex;align-items:flex-start;gap:18px;padding-bottom:16px}
+.o-logo{flex:0 0 64px;height:64px;border-radius:4px;overflow:hidden;background:var(--man);color:#fff;
+  display:flex;align-items:center;justify-content:center;font-family:var(--serif);font-size:25px;font-weight:700;letter-spacing:1px}
+.o-logo img{width:100%;height:100%;object-fit:contain;background:#fff}
+.khoi-ten{flex:1;padding-top:2px}
+.ten-vuon{font-family:var(--serif);font-size:24px;font-weight:700;color:var(--man-dam);letter-spacing:.6px;line-height:1.15;text-transform:uppercase}
+.gach-ten{width:44px;height:2.5px;background:var(--man);margin:8px 0}
+.dong-lien-he{font-size:11px;color:var(--mo);line-height:1.6}
+.dong-lien-he b{color:var(--muc);font-weight:600}
+.khoi-loai{text-align:right;flex:0 0 auto;padding-top:2px}
+.ten-loai{font-family:var(--serif);font-size:23px;font-weight:700;color:var(--man-dam);letter-spacing:.7px;white-space:nowrap;line-height:1.1}
+.ky-congno{margin-top:8px;font-size:12.5px;font-weight:600;font-variant-numeric:tabular-nums;white-space:nowrap}
+.nhan-ky{display:block;font-size:9.5px;letter-spacing:1.6px;text-transform:uppercase;color:var(--mo);font-weight:600;margin-bottom:2px}
+
+.ke-doi{height:3px;background:var(--man)}
+.ke-manh{height:1px;background:var(--ke);margin-bottom:18px}
+
+/* ── KHÁCH + TỔNG ── */
+.hai-khoi{display:grid;grid-template-columns:2fr 1fr;gap:14px;margin-bottom:16px}
+.khoi{background:var(--phan);border-left:3px solid var(--man);padding:12px 14px 13px}
+.tieu-khoi{font-size:9.5px;letter-spacing:1.8px;text-transform:uppercase;color:var(--man);font-weight:700;margin-bottom:9px}
+.dong{display:flex;gap:8px;margin-bottom:5px;font-size:12.5px;line-height:1.45}
+.dong:last-child{margin-bottom:0}
+.nhan{flex:0 0 74px;color:var(--mo);font-size:11px;padding-top:1px}
+.gia-tri{flex:1;font-weight:500;word-break:break-word}
+.ten-khach{font-size:16px;font-weight:700;color:var(--man-dam);line-height:1.25;margin-bottom:8px}
+.khoi-hep .dong{display:block}
+.khoi-hep .nhan{flex:none;margin-bottom:1px}
+
+/* ── BẢNG ── */
+.bao-bang{margin-bottom:16px}
+.tieu-muc{
+  display:flex;justify-content:space-between;align-items:baseline;
+  margin:22px 0 9px;padding-bottom:6px;border-bottom:2px solid var(--man);
+}
+.tieu-muc > span:first-child{
+  font-size:10.5px;letter-spacing:2.2px;text-transform:uppercase;color:var(--man);font-weight:700;
+}
+.dem-dong{font-size:10.5px;color:var(--mo);font-variant-numeric:tabular-nums}
+table{width:100%;border-collapse:collapse}
+thead th{background:var(--man);color:#fff;font-size:9px;font-weight:700;letter-spacing:.5px;
+  text-transform:uppercase;padding:8px 6px;text-align:left;white-space:nowrap}
+thead th:first-child{padding-left:10px}
+thead th:last-child{padding-right:10px}
+tbody td{padding:7px 6px;font-size:11px;border-bottom:1px solid var(--ke);vertical-align:top;line-height:1.35}
+tbody td:first-child{padding-left:10px}
+tbody td:last-child{padding-right:10px}
+tbody tr:last-child td{border-bottom:2px solid var(--man)}
+tbody tr:nth-last-child(2) td{border-bottom:1px solid var(--ke)}
+tbody tr.dong-cong-bang td{padding:9px 6px;font-size:11.5px;font-weight:700;
+  background:var(--phan);border-top:2px solid var(--man);border-bottom:2px solid var(--man)}
+.giua{text-align:center}
+.phai{text-align:right}
+.so{font-variant-numeric:tabular-nums;white-space:nowrap}
+.ma-cay{font-weight:700;color:var(--man-dam)}
+.stt{color:var(--mo);font-size:10px}
+.den-bu{color:var(--do)}
+.bang-trong{padding:26px;text-align:center;color:var(--mo);font-size:12.5px;background:var(--phan)}
+
+/* ── TỔNG KẾT ── */
+.khu-tong{display:flex;gap:20px;align-items:flex-start;margin-bottom:14px}
+.khu-qr{flex:0 0 auto;text-align:center;display:none}
+.khu-qr.hien{display:block}
+.o-qr{width:124px;height:124px;border:1px solid var(--ke);padding:5px;background:#fff;display:flex;align-items:center;justify-content:center}
+.o-qr img{width:100%;height:100%;object-fit:contain}
+.chu-qr{font-size:9.5px;color:var(--mo);margin-top:6px;line-height:1.5;max-width:124px}
+.chu-qr b{display:block;color:var(--man-dam);font-size:10.5px;font-weight:700}
+.cot-tong{flex:1;min-width:0}
+.dong-tong{display:flex;justify-content:space-between;align-items:baseline;padding:6px 0;font-size:13px;border-bottom:1px dotted var(--ke)}
+.dong-tong .nhan-tong{color:var(--mo)}
+.dong-tong .so-tong{font-weight:600;font-variant-numeric:tabular-nums}
+.dong-tong.dong-den-bu .so-tong{color:var(--do)}
+.dong-cong{display:flex;justify-content:space-between;align-items:center;background:var(--man);color:#fff;padding:13px 16px;margin-top:10px}
+.dong-cong .nhan-tong{font-size:11px;letter-spacing:1.8px;text-transform:uppercase;font-weight:700;opacity:.92}
+.dong-cong .so-tong{font-size:25px;font-weight:700;font-variant-numeric:tabular-nums;letter-spacing:-.3px}
+.bang-chu{margin-top:9px;padding-left:11px;border-left:2px solid var(--man);
+  font-family:var(--serif);font-style:italic;font-size:12.5px;color:var(--man-dam);line-height:1.5}
+.bang-chu span{font-style:normal;color:var(--mo);font-family:var(--sans);font-size:11px}
+
+.ghi-chu{background:var(--phan);padding:10px 13px;font-size:11.5px;line-height:1.6}
+.ghi-chu b{color:var(--man-dam)}
+.loi-cam-on{text-align:center;font-family:var(--serif);font-style:italic;font-size:12px;color:var(--mo);padding-top:16px}
+
+/* ── NÚT ── */
+.khu-nut{display:flex;gap:10px;margin:22px 0 4px}
+.nut{flex:1;padding:14px;border:none;font-family:var(--sans);font-size:13.5px;font-weight:700;letter-spacing:.5px;
+  cursor:pointer;transition:opacity .15s,transform .1s;display:flex;align-items:center;justify-content:center;gap:8px}
+.nut-chinh{background:var(--man);color:#fff}
+.nut-phu{background:#fff;color:var(--man);border:1.5px solid var(--man)}
+.nut:hover{opacity:.88}
+.nut:active{transform:translateY(1px)}
+.nut:disabled{opacity:.55;cursor:not-allowed}
+.nut:focus-visible{outline:3px solid var(--man-dam);outline-offset:2px}
+.vong-quay{width:15px;height:15px;border:2px solid rgba(255,255,255,.35);border-top-color:#fff;border-radius:50%;display:none;animation:quay .7s linear infinite}
+.nut.dang-chay .vong-quay{display:block}
+@keyframes quay{to{transform:rotate(360deg)}}
+@media (prefers-reduced-motion:reduce){.vong-quay{animation-duration:2s}*{transition:none!important}}
+
+.canh-bao{
+  display:none;margin:14px 0 0;padding:10px 13px;background:#FFF6E5;border-left:3px solid #C98A16;
+  font-size:11.5px;line-height:1.55;color:#6B4A05;
+}
+.canh-bao.hien{display:block}
+
+/* ── IN RA PDF ── */
+@media print{
+  body{background:#fff;padding:0}
+  .to-phieu{box-shadow:none;width:100%;padding:0}
+  .khong-chup{display:none!important}
+  @page{size:A4 portrait;margin:13mm 11mm}
+
+  thead{display:table-header-group}   /* lặp tiêu đề bảng ở mỗi trang */
+  tr{break-inside:avoid;page-break-inside:avoid}
+  .dau-phieu,.hai-khoi,.khu-tong,.ghi-chu{break-inside:avoid}
+  .tieu-muc{break-after:avoid;page-break-after:avoid}
+
+  thead th{background:var(--man)!important;color:#fff!important;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  .dong-cong{background:var(--man)!important;color:#fff!important;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  .khoi,.ghi-chu,tbody tr.dong-cong-bang td{background:var(--phan)!important;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  .o-logo{background:var(--man)!important;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+}
+</style>
+</head>
+<body>
+
+<div class="to-phieu" id="toPhieu">
+
+  <div class="dau-phieu">
+    <div class="o-logo" id="oLogo">TA</div>
+    <div class="khoi-ten">
+      <div class="ten-vuon" id="tenVuon">VƯỜN LAN TÚ ANH</div>
+      <div class="gach-ten"></div>
+      <div class="dong-lien-he">
+        <div id="diaChiVuon">Đức Trọng — Lâm Đồng</div>
+        <div>Điện thoại <b id="dienThoaiVuon">0987 195 495</b></div>
+        <div id="tkVuon" style="display:none"></div>
+      </div>
+    </div>
+    <div class="khoi-loai">
+      <div class="ten-loai">BẢNG CÔNG NỢ</div>
+      <div class="ky-congno">
+        <span class="nhan-ky">Kỳ đối chiếu</span>
+        <span id="kyCongNo">—</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="ke-doi"></div>
+  <div class="ke-manh"></div>
+
+  <div class="hai-khoi">
+    <div class="khoi">
+      <div class="tieu-khoi">Khách hàng</div>
+      <div class="ten-khach" id="tenKhach">—</div>
+      <div class="dong">
+        <div class="nhan">Điện thoại</div>
+        <div class="gia-tri so" id="sdtKhach">—</div>
+      </div>
+      <div class="dong">
+        <div class="nhan">Địa chỉ</div>
+        <div class="gia-tri" id="diaChiKhach">—</div>
+      </div>
+    </div>
+    <div class="khoi khoi-hep">
+      <div class="tieu-khoi">Chi tiết</div>
+      <div class="dong">
+        <div class="nhan">Số dòng</div>
+        <div class="gia-tri so" id="soDong">0</div>
+      </div>
+      <div class="dong">
+        <div class="nhan">Tổng số cây</div>
+        <div class="gia-tri so" id="tongCay">0</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="khu-tong">
+    <div class="khu-qr" id="khuQR">
+      <div class="o-qr" id="oQR"></div>
+      <div class="chu-qr" id="chuQR"><b>Quét mã để chuyển khoản</b></div>
+    </div>
+    <div class="cot-tong">
+      <div class="dong-tong">
+        <span class="nhan-tong">Tổng tiền cây</span>
+        <span class="so-tong" id="tongTienCay">0 đ</span>
+      </div>
+      <div class="dong-tong" id="dongVanChuyen">
+        <span class="nhan-tong">Tổng tiền vận chuyển</span>
+        <span class="so-tong" id="tongVanChuyen">0 đ</span>
+      </div>
+      <div class="dong-tong dong-den-bu" id="dongDenBu">
+        <span class="nhan-tong" id="nhanDenBu">Số tiền phát sinh</span>
+        <span class="so-tong" id="tongDenBu">0 đ</span>
+      </div>
+      <div class="dong-cong">
+        <span class="nhan-tong">Tổng cần thanh toán</span>
+        <span class="so-tong" id="tongCong">0 đ</span>
+      </div>
+      <div class="bang-chu"><span>Bằng chữ:</span> <em id="bangChu">Không đồng</em></div>
+    </div>
+  </div>
+
+  <div class="ghi-chu">
+    <b>Ghi chú:</b> <span id="ghiChu">Bảng công nợ chỉ tính các đơn chưa thanh toán trong kỳ. Quý khách vui lòng đối chiếu và phản hồi nếu có sai lệch.</span>
+  </div>
+
+  <div class="tieu-muc">
+    <span>Chi tiết công nợ</span>
+    <span class="dem-dong" id="demDong"></span>
+  </div>
+
+  <div class="bao-bang">
+    <table id="bangCongNo">
+      <thead>
+        <tr>
+          <th style="width:28px">TT</th>
+          <th style="width:66px">Ngày</th>
+          <th>Người nhận</th>
+          <th style="width:52px">Mã cây</th>
+          <th style="width:78px">Loại cây</th>
+          <th class="giua" style="width:38px">SL</th>
+          <th class="phai" style="width:66px">Đơn giá</th>
+          <th class="phai" style="width:78px">Thành tiền</th>
+          <th class="phai cot-den-bu" style="width:60px">Đền bù</th>
+          <th class="phai cot-phi-vc" style="width:66px">Phí VC</th>
+        </tr>
+      </thead>
+      <tbody id="thanBang"></tbody>
+    </table>
+    <div class="bang-trong" id="bangTrong" style="display:none">
+      Không có dòng công nợ nào trong kỳ này.
+    </div>
+  </div>
+
+  <div class="loi-cam-on" id="loiCamOn">Cảm ơn quý khách đã tin tưởng vườn lan Tú Anh</div>
+
+  <div class="canh-bao khong-chup" id="canhBao"></div>
+
+  <div class="khu-nut khong-chup">
+    <button class="nut nut-chinh" onclick="window.print()">Xuất PDF / In</button>
+    <button class="nut nut-phu" onclick="chiaSeAnh()" id="nutAnh">
+      <span class="vong-quay"></span>
+      <span class="chu-nut">Chia sẻ hình ảnh</span>
+    </button>
+  </div>
+</div>
+
+<script>
+/* ═══════════════════════════════════════════════════════════
+   CẤU HÌNH VƯỜN — CHỈ SỬA TRONG KHUNG NÀY
+   ═══════════════════════════════════════════════════════════ */
+const CAU_HINH = {
+  ten:       'VƯỜN LAN TÚ ANH',
+  diaChi:    'Đức Trọng — Lâm Đồng',
+  dienThoai: '0987 195 495',
+
+  soTaiKhoan:  '',   // '5412205008327 — Agribank'
+  chuTaiKhoan: '',   // 'TRAN TRUNG THU'
+
+  chuLogo: 'TA',
+  logo:    '',
+  maQR:    '',
+
+  ghiChu: 'Bảng công nợ chỉ tính các đơn chưa thanh toán trong kỳ. Quý khách vui lòng đối chiếu và phản hồi nếu có sai lệch.',
+  camOn:  'Cảm ơn quý khách đã tin tưởng vườn lan Tú Anh',
+
+  // Cột ĐỀN BÙ cộng vào hay trừ ra khỏi số phải thu?
+  //   'cong' = cộng thêm (chi phí phát sinh khách phải trả)
+  //   'tru'  = trừ bớt  (vườn đền cây chết cho khách)
+  denBu: 'tru',
+
+  // Ngày kiểu 06/04/2025 không rõ đâu là ngày: 'MDY' hoặc 'DMY'
+  thuTuNgay: 'MDY'
+};
+/* ═══════════════════════════════════════════════════════════ */
+
+
+function docThamSo(){
+  const p = new URLSearchParams(location.search);
+  return {
+    tuNgay: p.get('tuNgay'), denNgay: p.get('denNgay'),
+    customerName: p.get('customerName'),
+    customerPhone: p.get('customerPhone'),
+    customerAddress: p.get('customerAddress'),
+
+    rowDate:     p.get('rowDate'),
+    rowReceiver: p.get('rowReceiver'),
+    rowCode:     p.get('rowCode'),
+    rowType:     p.get('rowType'),
+    rowQty:      p.get('rowQty'),
+    rowPrice:    p.get('rowPrice'),
+    rowAmount:   p.get('rowAmount'),
+    rowExtra:    p.get('rowExtra'),
+    rowShipping: p.get('rowShipping'),
+
+    // ghi đè tổng nếu muốn lấy đúng số của AppSheet
+    tongTienCay:   p.get('tongTienCay'),
+    tongVanChuyen: p.get('tongVanChuyen'),
+    tongDenBu:     p.get('tongDenBu'),
+    tongCong:      p.get('tongCong'),
+
+    companyName: p.get('companyName'),
+    companyAddress: p.get('companyAddress'),
+    companyPhone: p.get('companyPhone'),
+    logoUrl: p.get('logoUrl'),
+    qrUrl: p.get('qrUrl')
+  };
+}
+
+/* Giữ nguyên ô rỗng để các cột không bị lệch dòng */
+function tachCot(chuoi){
+  if (chuoi === null || chuoi === undefined || chuoi === '') return [];
+  return String(chuoi).split('||').map(s => s.trim());
+}
+
+/* ---------- Số ---------- */
+function docSo(v){
+  if (v === 0) return 0;
+  if (!v) return 0;
+  let s = String(v).replace(/đ/gi,'').replace(/Ä'/g,'').replace(/\s/g,'');
+  const vp = s.lastIndexOf(','), vc = s.lastIndexOf('.'), cuoi = Math.max(vp,vc);
+  if (cuoi !== -1){
+    const duoi = s.substring(cuoi+1);
+    if (/^\d{3}$/.test(duoi)) s = s.replace(/[,.]/g,'');
+    else if (vp === cuoi){ s = s.substring(0,vp)+'.'+s.substring(vp+1); s = s.replace(/,/g,''); }
+    else s = s.replace(/,/g,'');
+  }
+  const am = /^-/.test(String(v).trim());
+  s = s.replace(/[^\d.]/g,'');
+  const n = parseFloat(s) || 0;
+  return am ? -n : n;
+}
+function vietSo(n){
+  const x = Math.round(Number(n)||0);
+  const dau = x < 0 ? '−' : '';
+  return dau + Math.abs(x).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+}
+
+const CHU_SO=['không','một','hai','ba','bốn','năm','sáu','bảy','tám','chín'];
+function docBaSo(n,coTram){
+  const tram=Math.floor(n/100), chuc=Math.floor(n/10)%10, dv=n%10;
+  let s='';
+  if(coTram||tram>0) s=CHU_SO[tram]+' trăm';
+  if(chuc===0){ if(dv>0) s+=(s?' linh ':'')+CHU_SO[dv]; }
+  else if(chuc===1){ s+=(s?' ':'')+'mười'; if(dv===5)s+=' lăm'; else if(dv>0)s+=' '+CHU_SO[dv]; }
+  else{ s+=(s?' ':'')+CHU_SO[chuc]+' mươi';
+    if(dv===1)s+=' mốt'; else if(dv===4)s+=' tư'; else if(dv===5)s+=' lăm'; else if(dv>0)s+=' '+CHU_SO[dv]; }
+  return s.trim();
+}
+function docThanhChu(n){
+  const am = Number(n) < 0;
+  n = Math.round(Math.abs(Number(n)||0));
+  if(n===0) return 'Không đồng';
+  if(n>999999999999) return vietSo(n)+' đồng';
+  const nhom=[]; let x=n;
+  while(x>0){ nhom.push(x%1000); x=Math.floor(x/1000); }
+  const dv=['',' nghìn',' triệu',' tỷ'], phan=[];
+  for(let i=nhom.length-1;i>=0;i--){ if(nhom[i]===0) continue; phan.push(docBaSo(nhom[i], i<nhom.length-1)+dv[i]); }
+  let s=phan.join(' ');
+  s = s.charAt(0).toUpperCase()+s.slice(1)+' đồng';
+  return am ? 'Âm ' + s.charAt(0).toLowerCase()+s.slice(1) : s;
+}
+
+/* ---------- Ngày ---------- */
+function hai(v){ return String(v).padStart(2,'0'); }
+function dinhDangNgay(tho){
+  if(!tho) return '';
+  const s=String(tho).trim();
+  let m=s.match(/^(\d{4})-(\d{1,2})-(\d{1,2})/);
+  if(m) return hai(m[3])+'/'+hai(m[2])+'/'+m[1];
+  m=s.match(/^(\d{1,2})[\/\-.](\d{1,2})[\/\-.](\d{2,4})$/);
+  if(m){
+    const a=+m[1], b=+m[2]; let ng,th;
+    if(a>12){ng=a;th=b;} else if(b>12){ng=b;th=a;}
+    else if(CAU_HINH.thuTuNgay==='DMY'){ng=a;th=b;} else {ng=b;th=a;}
+    return hai(ng)+'/'+hai(th)+'/'+(m[3].length===2?'20'+m[3]:m[3]);
+  }
+  return s;
+}
+function ngayNgan(tho){          // 07/08 cho cột hẹp, giữ năm nếu khác năm hiện tại
+  const d = dinhDangNgay(tho);
+  const m = d.match(/^(\d{2})\/(\d{2})\/(\d{4})$/);
+  if(!m) return d;
+  return m[3] === String(new Date().getFullYear()) ? m[1]+'/'+m[2] : d;
+}
+
+/* ---------- Ảnh ---------- */
+async function anhSangBase64(url){
+  try{
+    const r = await fetch(url,{mode:'cors',cache:'force-cache'});
+    if(!r.ok) throw new Error('HTTP '+r.status);
+    const b = await r.blob();
+    return await new Promise((ok,loi)=>{ const f=new FileReader(); f.onload=()=>ok(f.result); f.onerror=loi; f.readAsDataURL(b); });
+  }catch(e){ console.warn('[Công nợ] Không tải được ảnh:',url,e.message); return null; }
+}
+async function ganAnh(o,src,ten){
+  if(!o||!src) return false;
+  let cuoi=src;
+  if(/^https?:\/\//i.test(src)){
+    const b=await anhSangBase64(src);
+    if(b) cuoi=b; else console.warn('[Công nợ] "'+ten+'" có thể mất khi chụp ảnh. Dùng host bật CORS.');
+  }
+  const chuCu=o.textContent, img=new Image();
+  img.alt=ten; img.src=cuoi;
+  const ok=await new Promise(r=>{ if(img.complete&&img.naturalWidth>0) return r(true); img.onload=()=>r(true); img.onerror=()=>r(false); });
+  if(ok){ o.innerHTML=''; o.appendChild(img); return true; }
+  o.textContent=chuCu; return false;
+}
+
+/* ---------- Vẽ ---------- */
+async function veVuon(p){
+  const ten=p.companyName||CAU_HINH.ten;
+  const dc =p.companyAddress||CAU_HINH.diaChi;
+  let sdt=(p.companyPhone||CAU_HINH.dienThoai).replace(/^\s*(Điện thoại|ĐT|SĐT|Tel)\s*[:.]?\s*/i,'');
+
+  document.getElementById('tenVuon').textContent=ten;
+  document.getElementById('diaChiVuon').textContent=dc;
+  document.getElementById('dienThoaiVuon').textContent=sdt;
+
+  if(CAU_HINH.soTaiKhoan){
+    const o=document.getElementById('tkVuon');
+    o.style.display='';
+    o.innerHTML='Tài khoản <b>'+thoat(CAU_HINH.soTaiKhoan)+'</b>'+
+      (CAU_HINH.chuTaiKhoan?' — '+thoat(CAU_HINH.chuTaiKhoan):'');
+  }
+
+  const oLogo=document.getElementById('oLogo');
+  oLogo.textContent=CAU_HINH.chuLogo||ten.trim().charAt(0);
+  await ganAnh(oLogo,p.logoUrl||CAU_HINH.logo,'Logo');
+
+  const nguonQR=p.qrUrl||CAU_HINH.maQR;
+  if(nguonQR && await ganAnh(document.getElementById('oQR'),nguonQR,'Mã QR')){
+    document.getElementById('khuQR').classList.add('hien');
+    const d=['<b>Quét mã để chuyển khoản</b>'];
+    if(CAU_HINH.soTaiKhoan) d.push(thoat(CAU_HINH.soTaiKhoan));
+    if(CAU_HINH.chuTaiKhoan) d.push(thoat(CAU_HINH.chuTaiKhoan));
+    document.getElementById('chuQR').innerHTML=d.join('<br>');
+  }
+
+  document.getElementById('ghiChu').textContent=CAU_HINH.ghiChu;
+  document.getElementById('loiCamOn').textContent=CAU_HINH.camOn;
+  document.getElementById('nhanDenBu').textContent =
+    CAU_HINH.denBu==='tru' ? 'Đền bù (trừ)' : 'Số tiền phát sinh';
+}
+
+function thoat(s){ return String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
+
+function veCongNo(p){
+  const tu=dinhDangNgay(p.tuNgay), den=dinhDangNgay(p.denNgay);
+  document.getElementById('kyCongNo').textContent =
+    tu&&den ? tu+' → '+den : (tu||den||'Toàn bộ');
+
+  if(p.customerName)    document.getElementById('tenKhach').textContent=p.customerName;
+  if(p.customerPhone)   document.getElementById('sdtKhach').textContent=p.customerPhone;
+  if(p.customerAddress) document.getElementById('diaChiKhach').textContent=p.customerAddress;
+
+  const tieuDe=['BẢNG CÔNG NỢ', document.getElementById('tenVuon').textContent];
+  if(p.customerName) tieuDe.push(p.customerName.trim());
+  if(tu&&den) tieuDe.push(tu+' - '+den);
+  document.title=tieuDe.join(' - ');
+
+  veBang(p);
+}
+
+function veBang(p){
+  const cot={
+    ngay:  tachCot(p.rowDate),
+    nhan:  tachCot(p.rowReceiver),
+    ma:    tachCot(p.rowCode),
+    loai:  tachCot(p.rowType),
+    sl:    tachCot(p.rowQty),
+    gia:   tachCot(p.rowPrice),
+    tien:  tachCot(p.rowAmount),
+    bu:    tachCot(p.rowExtra),
+    phi:   tachCot(p.rowShipping)
+  };
+  const soDong=Math.max(...Object.values(cot).map(a=>a.length), 0);
+
+  const than=document.getElementById('thanBang');
+  than.innerHTML='';
+
+  let sCay=0, sTien=0, sBu=0, sPhi=0, sSL=0, dem=0;
+  const lay=(a,i)=>(a[i]!==undefined?a[i]:'');
+
+  for(let i=0;i<soDong;i++){
+    const o={
+      ngay:lay(cot.ngay,i), nhan:lay(cot.nhan,i), ma:lay(cot.ma,i), loai:lay(cot.loai,i),
+      sl:lay(cot.sl,i), gia:lay(cot.gia,i), tien:lay(cot.tien,i), bu:lay(cot.bu,i), phi:lay(cot.phi,i)
+    };
+    if(Object.values(o).every(v=>v==='')) continue;   // bỏ dòng rỗng hoàn toàn
+
+    const sl=docSo(o.sl), gia=docSo(o.gia), bu=docSo(o.bu), phi=docSo(o.phi);
+    // Thành tiền: ưu tiên số gửi sang, thiếu thì tự nhân
+    const tien = o.tien!=='' ? docSo(o.tien) : sl*gia;
+
+    sSL+=sl; sTien+=tien; sBu+=bu; sPhi+=phi; dem++;
+
+    const maSach = o.ma.includes('-') ? o.ma.split('-')[0].trim() : o.ma;
+    // [NGƯỜI NHẬN] có thể là "Tên │ SĐT │ Địa chỉ" -> chỉ lấy tên
+    const nhanGon = o.nhan.split(/\s*[│|]+\s*/)[0].trim();
+    const tr=than.insertRow();
+    tr.innerHTML =
+      '<td class="stt so">'+dem+'</td>'+
+      '<td class="so">'+thoat(ngayNgan(o.ngay))+'</td>'+
+      '<td>'+thoat(nhanGon)+'</td>'+
+      '<td class="ma-cay">'+thoat(maSach)+'</td>'+
+      '<td>'+thoat(o.loai)+'</td>'+
+      '<td class="giua so">'+(sl?vietSo(sl):'')+'</td>'+
+      '<td class="phai so">'+(gia?vietSo(gia):'')+'</td>'+
+      '<td class="phai so">'+vietSo(tien)+'</td>'+
+      '<td class="phai so den-bu cot-den-bu">'+(bu?vietSo(bu):'')+'</td>'+
+      '<td class="phai so cot-phi-vc">'+(phi?vietSo(phi):'')+'</td>';
+  }
+
+  sCay=sTien;
+
+  if(dem===0){
+    document.getElementById('bangCongNo').style.display='none';
+    document.getElementById('bangTrong').style.display='';
+  }else{
+    const trCong=than.insertRow();
+    trCong.className='dong-cong-bang';
+    trCong.innerHTML =
+      '<td colspan="5" class="phai">Cộng toàn kỳ</td>'+
+      '<td class="giua so">'+vietSo(sSL)+'</td>'+
+      '<td></td>'+
+      '<td class="phai so">'+vietSo(sTien)+'</td>'+
+      '<td class="phai so den-bu cot-den-bu">'+vietSo(sBu)+'</td>'+
+      '<td class="phai so cot-phi-vc">'+vietSo(sPhi)+'</td>';
+  }
+
+  document.getElementById('soDong').textContent=vietSo(dem);
+  document.getElementById('tongCay').textContent=vietSo(sSL);
+  document.getElementById('demDong').textContent = dem ? vietSo(dem)+' dòng · '+vietSo(sSL)+' cây' : '';
+
+  // Tổng: tự tính, nhưng tham số truyền vào được ưu tiên
+  const tCay = p.tongTienCay!=null   ? docSo(p.tongTienCay)   : sCay;
+  const tPhi = p.tongVanChuyen!=null ? docSo(p.tongVanChuyen) : sPhi;
+  const tBu  = p.tongDenBu!=null     ? docSo(p.tongDenBu)     : sBu;
+  const tuTinh = CAU_HINH.denBu==='tru' ? tCay+tPhi-tBu : tCay+tPhi+tBu;
+  const tCong = p.tongCong!=null ? docSo(p.tongCong) : tuTinh;
+
+  document.getElementById('tongTienCay').textContent=vietSo(tCay)+' đ';
+  document.getElementById('tongVanChuyen').textContent=vietSo(tPhi)+' đ';
+  document.getElementById('tongDenBu').textContent=
+    (CAU_HINH.denBu==='tru' && tBu>0 ? '− ' : '')+vietSo(tBu)+' đ';
+  document.getElementById('tongCong').textContent=vietSo(tCong)+' đ';
+  document.getElementById('bangChu').textContent=docThanhChu(tCong);
+
+  const coDenBu = (tBu!==0 || sBu!==0);
+  document.getElementById('dongDenBu').style.display = coDenBu ? '' : 'none';
+  document.querySelectorAll('.cot-den-bu').forEach(e => { e.style.display = coDenBu ? '' : 'none'; });
+
+  const coPhi = (tPhi!==0 || sPhi!==0);
+  document.getElementById('dongVanChuyen').style.display = coPhi ? '' : 'none';
+  document.querySelectorAll('.cot-phi-vc').forEach(e => { e.style.display = coPhi ? '' : 'none'; });
+
+  // Cảnh báo nếu số của AppSheet lệch với số tự cộng
+  if(p.tongCong!=null && Math.abs(tCong-tuTinh)>1){
+    const c=document.getElementById('canhBao');
+    c.classList.add('hien');
+    c.textContent='Số tổng nhận được ('+vietSo(tCong)+' đ) lệch '+vietSo(tCong-tuTinh)+
+      ' đ so với tổng cộng từ các dòng chi tiết ('+vietSo(tuTinh)+' đ). Kiểm tra lại dữ liệu trước khi gửi khách.';
+  }
+}
+
+/* ---------- Chạy ---------- */
+window.addEventListener('DOMContentLoaded', async ()=>{
+  const p=docThamSo();
+  await veVuon(p);
+  veCongNo(p);
+});
+
+function chinhKhungNhin(){
+  const r=window.screen.width;
+  if(r<740) document.getElementById('viewport').setAttribute('content',
+    'width=740, initial-scale='+(r/740)+', maximum-scale=2.0, user-scalable=yes');
+}
+chinhKhungNhin();
+window.addEventListener('orientationchange',()=>setTimeout(chinhKhungNhin,100));
+window.addEventListener('resize',chinhKhungNhin);
+
+/* ---------- Chia sẻ ảnh (dùng cho bảng ngắn) ---------- */
+function chiaSeAnh(){
+  const nut=document.getElementById('nutAnh'), chu=nut.querySelector('.chu-nut'), goc=chu.textContent;
+  nut.disabled=true; nut.classList.add('dang-chay'); chu.textContent='Đang tạo ảnh…';
+  if(typeof html2canvas==='undefined'){
+    const s=document.createElement('script');
+    s.src='https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js';
+    s.onload=()=>chup(nut,chu,goc);
+    s.onerror=()=>baoLoi('Không tải được thư viện. Kiểm tra mạng.',nut,chu,goc);
+    document.head.appendChild(s); return;
+  }
+  chup(nut,chu,goc);
+}
+
+async function chup(nut,chu,goc){
+  const to=document.getElementById('toPhieu');
+  try{
+    document.body.classList.add('dang-chup');
+    if(document.fonts&&document.fonts.ready) await document.fonts.ready.catch(()=>{});
+    await new Promise(r=>setTimeout(r,350));
+    const canvas=await html2canvas(to,{scale:2,backgroundColor:'#ffffff',logging:false,
+      useCORS:true,allowTaint:false,width:700,height:to.scrollHeight,
+      windowWidth:700,windowHeight:to.scrollHeight,scrollX:0,scrollY:0});
+    document.body.classList.remove('dang-chup');
+    canvas.toBlob(async blob=>{
+      if(!blob) return baoLoi('Không tạo được ảnh.',nut,chu,goc);
+      const ten='cong-no-'+Date.now()+'.png';
+      const file=new File([blob],ten,{type:'image/png'});
+      if(navigator.share&&navigator.canShare&&navigator.canShare({files:[file]})){
+        try{ await navigator.share({files:[file],title:document.title,text:document.title}); traLai(nut,chu,goc); }
+        catch(e){ e.name==='AbortError'?traLai(nut,chu,goc):taiVe(blob,ten,nut,chu,goc); }
+      } else taiVe(blob,ten,nut,chu,goc);
+    },'image/png');
+  }catch(e){
+    document.body.classList.remove('dang-chup');
+    console.error(e); baoLoi('Chụp ảnh thất bại: '+e.message,nut,chu,goc);
+  }
+}
+function taiVe(blob,ten,nut,chu,goc){
+  const u=URL.createObjectURL(blob), a=document.createElement('a');
+  a.href=u; a.download=ten; document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  URL.revokeObjectURL(u); chu.textContent='Đã tải ảnh về máy';
+  setTimeout(()=>traLai(nut,chu,goc),2200);
+}
+function baoLoi(t,nut,chu,goc){ chu.textContent=t; setTimeout(()=>traLai(nut,chu,goc),3200); }
+function traLai(nut,chu,goc){ nut.disabled=false; nut.classList.remove('dang-chay'); chu.textContent=goc; }
+</script>
+</body>
+</html>

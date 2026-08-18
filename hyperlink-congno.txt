@@ -1,0 +1,64 @@
+HYPERLINK(
+  CONCATENATE(
+    "https://kidmo0n.github.io/tuanh_congno/index.html",
+
+    "?tuNgay=",  ENCODEURL(TEXT([TỪ NGÀY],  "YYYY-MM-DD")),
+    "&denNgay=", ENCODEURL(TEXT([ĐẾN NGÀY], "YYYY-MM-DD")),
+
+    "&customerName=",    ENCODEURL([CHỌN KHÁCH HÀNG ĐẠI LÝ]),
+    "&customerPhone=",   ENCODEURL(ANY(SELECT(QUẢN LÝ KHÁCH HÀNG ĐẠI LÝ[SĐT],
+                            [KHÁCH HÀNG ĐẠI LÝ]=[_THISROW].[CHỌN KHÁCH HÀNG ĐẠI LÝ], TRUE))),
+    "&customerAddress=", ENCODEURL(ANY(SELECT(QUẢN LÝ KHÁCH HÀNG ĐẠI LÝ[ĐỊA CHỈ],
+                            [KHÁCH HÀNG ĐẠI LÝ]=[_THISROW].[CHỌN KHÁCH HÀNG ĐẠI LÝ], TRUE))),
+
+    "&rowDate=",     ENCODEURL(SUBSTITUTE(TEXT(SELECT(QUẢN LÝ HOÁ ĐƠN CHI TIẾT[THỜI GIAN LÊN ĐƠN],
+                        AND([THỜI GIAN LÊN ĐƠN] >= [_THISROW].[TỪ NGÀY],
+                            [THỜI GIAN LÊN ĐƠN] <= [_THISROW].[ĐẾN NGÀY],
+                            [KHÁCH HÀNG ĐẠI LÝ]  =  [_THISROW].[CHỌN KHÁCH HÀNG ĐẠI LÝ],
+                            [TRẠNG THÁI THANH TOÁN] <> "ĐÃ THANH TOÁN"), FALSE)), " , ", "||")),
+
+    "&rowReceiver=", ENCODEURL(SUBSTITUTE(SUBSTITUTE(TEXT(SELECT(QUẢN LÝ HOÁ ĐƠN CHI TIẾT[NGƯỜI NHẬN],
+                        AND([THỜI GIAN LÊN ĐƠN] >= [_THISROW].[TỪ NGÀY],
+                            [THỜI GIAN LÊN ĐƠN] <= [_THISROW].[ĐẾN NGÀY],
+                            [KHÁCH HÀNG ĐẠI LÝ]  =  [_THISROW].[CHỌN KHÁCH HÀNG ĐẠI LÝ],
+                            [TRẠNG THÁI THANH TOÁN] <> "ĐÃ THANH TOÁN"), FALSE)),
+                        " || ", " │ "), " , ", "||")),
+
+    "&rowCode=",     ENCODEURL(SUBSTITUTE(TEXT(SELECT(QUẢN LÝ HOÁ ĐƠN CHI TIẾT[MÃ CÂY],
+                        AND([THỜI GIAN LÊN ĐƠN] >= [_THISROW].[TỪ NGÀY],
+                            [THỜI GIAN LÊN ĐƠN] <= [_THISROW].[ĐẾN NGÀY],
+                            [KHÁCH HÀNG ĐẠI LÝ]  =  [_THISROW].[CHỌN KHÁCH HÀNG ĐẠI LÝ],
+                            [TRẠNG THÁI THANH TOÁN] <> "ĐÃ THANH TOÁN"), FALSE)), " , ", "||")),
+
+    "&rowType=",     ENCODEURL(SUBSTITUTE(TEXT(SELECT(QUẢN LÝ HOÁ ĐƠN CHI TIẾT[LOẠI CÂY],
+                        AND([THỜI GIAN LÊN ĐƠN] >= [_THISROW].[TỪ NGÀY],
+                            [THỜI GIAN LÊN ĐƠN] <= [_THISROW].[ĐẾN NGÀY],
+                            [KHÁCH HÀNG ĐẠI LÝ]  =  [_THISROW].[CHỌN KHÁCH HÀNG ĐẠI LÝ],
+                            [TRẠNG THÁI THANH TOÁN] <> "ĐÃ THANH TOÁN"), FALSE)), " , ", "||")),
+
+    "&rowQty=",      ENCODEURL(SUBSTITUTE(TEXT(SELECT(QUẢN LÝ HOÁ ĐƠN CHI TIẾT[SỐ LƯỢNG],
+                        AND([THỜI GIAN LÊN ĐƠN] >= [_THISROW].[TỪ NGÀY],
+                            [THỜI GIAN LÊN ĐƠN] <= [_THISROW].[ĐẾN NGÀY],
+                            [KHÁCH HÀNG ĐẠI LÝ]  =  [_THISROW].[CHỌN KHÁCH HÀNG ĐẠI LÝ],
+                            [TRẠNG THÁI THANH TOÁN] <> "ĐÃ THANH TOÁN"), FALSE)), " , ", "||")),
+
+    "&rowPrice=",    ENCODEURL(SUBSTITUTE(TEXT(SELECT(QUẢN LÝ HOÁ ĐƠN CHI TIẾT[ĐƠN GIÁ],
+                        AND([THỜI GIAN LÊN ĐƠN] >= [_THISROW].[TỪ NGÀY],
+                            [THỜI GIAN LÊN ĐƠN] <= [_THISROW].[ĐẾN NGÀY],
+                            [KHÁCH HÀNG ĐẠI LÝ]  =  [_THISROW].[CHỌN KHÁCH HÀNG ĐẠI LÝ],
+                            [TRẠNG THÁI THANH TOÁN] <> "ĐÃ THANH TOÁN"), FALSE)), " , ", "||")),
+
+    "&rowExtra=",    ENCODEURL(SUBSTITUTE(TEXT(SELECT(QUẢN LÝ HOÁ ĐƠN CHI TIẾT[ĐỀN BÙ],
+                        AND([THỜI GIAN LÊN ĐƠN] >= [_THISROW].[TỪ NGÀY],
+                            [THỜI GIAN LÊN ĐƠN] <= [_THISROW].[ĐẾN NGÀY],
+                            [KHÁCH HÀNG ĐẠI LÝ]  =  [_THISROW].[CHỌN KHÁCH HÀNG ĐẠI LÝ],
+                            [TRẠNG THÁI THANH TOÁN] <> "ĐÃ THANH TOÁN"), FALSE)), " , ", "||")),
+
+    "&rowShipping=", ENCODEURL(SUBSTITUTE(TEXT(SELECT(QUẢN LÝ HOÁ ĐƠN CHI TIẾT[PHÍ VẬN CHUYỂN],
+                        AND([THỜI GIAN LÊN ĐƠN] >= [_THISROW].[TỪ NGÀY],
+                            [THỜI GIAN LÊN ĐƠN] <= [_THISROW].[ĐẾN NGÀY],
+                            [KHÁCH HÀNG ĐẠI LÝ]  =  [_THISROW].[CHỌN KHÁCH HÀNG ĐẠI LÝ],
+                            [TRẠNG THÁI THANH TOÁN] <> "ĐÃ THANH TOÁN"), FALSE)), " , ", "||"))
+  ),
+  "📄 Xem bảng công nợ"
+)
